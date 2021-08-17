@@ -1,14 +1,24 @@
 name: 'pre_setup'
 description: 'This is the pre setup'
+inputs:
+  infraEnvironment:
+    description: 'Pass the infra environment'
+    required: true
+    default: 'dev'
 runs:
   using: "composite"
   steps:
     - name: Terraform Init
       id: init
-      run: terraform init -input=false -backend-config=environment/dev/gcs-bucket.tfvars
+      run: terraform init -input=false -backend-config=environment/${{ inputs.infraEnvironment}}/gcs-bucket.tfvars
       shell: bash
 
     - name: Terraform Validate
       id: validate
       run: terraform validate -no-color
+      shell: bash
+
+    - name: Terraform plan
+      id: plan
+      run: terraform plan -out=dev.tfplan -var-file=environment/${{ inputs.infraEnvironment}}/variables.tfvars -input=false
       shell: bash
